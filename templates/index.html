@@ -1,1 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Software Readiness Checker</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #dbe2ea;
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --success: #15803d;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --shadow: 0 10px 25px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
 
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #ecfeff, #f8fafc);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px 0;
+      font-size: 2rem;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    input[type="url"] {
+      flex: 1;
+      min-width: 260px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input[type="url"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+
+    button {
+      padding: 14px 18px;
+      border: none;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status-box {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .loading {
+      background: #ecfeff;
+      color: #155e75;
+      border: 1px solid #bae6fd;
+    }
+
+    .error {
+      background: #fef2f2;
+      color: var(--danger);
+      border: 1px solid #fecaca;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .score-badge {
+      min-width: 110px;
+      text-align: center;
+      background: #ecfdf5;
+      color: var(--success);
+      border: 1px solid #bbf7d0;
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+
+    .score-badge .num {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .repo-meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      word-break: break-word;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .pass {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .partial {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .download-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .download-link {
+      text-decoration: none;
+      background: #111827;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .download-link:hover {
+      background: #000000;
+    }
+
+    ul.fix-list {
+      margin: 12px 0 0 18px;
+      padding: 0;
+    }
+
+    ul.fix-list li {
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 700px) {
+      .hero h1 {
+        font-size: 1.6rem;
+      }
+
+      .result-header {
+        align-items: flex-start;
+      }
+
+      .score-badge {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>Research Software Readiness Checker</h1>
+      <p>
+        Paste a public GitHub repository link to assess README quality, license,
+        tests, CI, versioning, citation support, overall score, and prioritized fixes.
+      </p>
+    </section>
+
+    <section class="card">
+      <form id="analyzeForm">
+        <label for="repo_url">GitHub Repository URL</label>
+        <div class="input-row">
+          <input
+            type="url"
+            id="repo_url"
+            name="repo_url"
+            placeholder="https://github.com/owner/repository"
+            required
+          />
+          <button type="submit" id="analyzeBtn">Analyze Repo</button>
+        </div>
+        <div class="small">
+          Example: https://github.com/pallets/flask
+        </div>
+      </form>
+
+      <div id="statusBox" class="status-box hidden"></div>
+    </section>
+
+    <section id="resultsSection" class="card hidden">
+      <div class="result-header">
+        <div>
+          <h2 style="margin:0 0 8px 0;">Analysis Result</h2>
+          <div id="repoMeta" class="repo-meta"></div>
+        </div>
+        <div class="score-badge">
+          <span class="num" id="scoreNum">0</span>
+          <span>/ 100</span>
+        </div>
+      </div>
+
+      <h3>Checks</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Check</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody id="checksTableBody"></tbody>
+      </table>
+
+      <h3 style="margin-top:24px;">Prioritized Fix Checklist</h3>
+      <ul id="fixList" class="fix-list"></ul>
+
+      <div class="download-row">
+        <a id="downloadJson" class="download-link hidden" href="#">Download JSON Report</a>
+        <a id="downloadHtml" class="download-link hidden" href="#">Download HTML Report</a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const form = document.getElementById("analyzeForm");
+    const repoInput = document.getElementById("repo_url");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const statusBox = document.getElementById("statusBox");
+    const resultsSection = document.getElementById("resultsSection");
+    const scoreNum = document.getElementById("scoreNum");
+    const repoMeta = document.getElementById("repoMeta");
+    const checksTableBody = document.getElementById("checksTableBody");
+    const fixList = document.getElementById("fixList");
+    const downloadJson = document.getElementById("downloadJson");
+    const downloadHtml = document.getElementById("downloadHtml");
+
+    function showStatus(message, type) {
+      statusBox.className = "status-box";
+      statusBox.classList.add(type);
+      statusBox.classList.remove("hidden");
+      statusBox.textContent = message;
+    }
+
+    function hideStatus() {
+      statusBox.classList.add("hidden");
+      statusBox.textContent = "";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text ?? "";
+      return div.innerHTML;
+    }
+
+    function getStatusClass(status) {
+      const val = (status || "").toLowerCase();
+      if (val === "pass") return "pass";
+      if (val === "partial") return "partial";
+      return "fail";
+    }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const repoUrl = repoInput.value.trim();
+      if (!repoUrl) {
+        showStatus("Please enter a GitHub repository URL.", "error");
+        return;
+      }
+
+      resultsSection.classList.add("hidden");
+      checksTableBody.innerHTML = "";
+      fixList.innerHTML = "";
+      downloadJson.classList.add("hidden");
+      downloadHtml.classList.add("hidden");
+
+      analyzeBtn.disabled = true;
+      analyzeBtn.textContent = "Analyzing...";
+      showStatus("Analyzing repository... please wait.", "loading");
+
+      try {
+        const response = await fetch("/analyze", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ repo_url: repoUrl })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Something went wrong.");
+        }
+
+        hideStatus();
+        resultsSection.classList.remove("hidden");
+
+        scoreNum.textContent = data.total_score ?? 0;
+        repoMeta.innerHTML = `
+          <strong>Repository:</strong> ${escapeHtml(data.repo || "")}<br>
+          <strong>URL:</strong> <a href="${escapeHtml(data.repo_url || "#")}" target="_blank" rel="noopener noreferrer">${escapeHtml(data.repo_url || "")}</a>
+        `;
+
+        (data.checks || []).forEach(check => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${escapeHtml(check.name)}</td>
+            <td><span class="pill ${getStatusClass(check.status)}">${escapeHtml(check.status)}</span></td>
+            <td>${escapeHtml(String(check.score))} / ${escapeHtml(String(check.weight))}</td>
+            <td>${escapeHtml(check.rationale)}</td>
+          `;
+          checksTableBody.appendChild(tr);
+        });
+
+        if ((data.fix_checklist || []).length === 0) {
+          const li = document.createElement("li");
+          li.textContent = "No major fixes suggested.";
+          fixList.appendChild(li);
+        } else {
+          data.fix_checklist.forEach(item => {
+            const li = document.createElement("li");
+            li.textContent = item;
+            fixList.appendChild(li);
+          });
+        }
+
+        if (data.json_download_url) {
+          downloadJson.href = data.json_download_url;
+          downloadJson.classList.remove("hidden");
+        }
+
+        if (data.html_download_url) {
+          downloadHtml.href = data.html_download_url;
+          downloadHtml.classList.remove("hidden");
+        }
+
+      } catch (error) {
+        showStatus(error.message || "Analysis failed.", "error");
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = "Analyze Repo";
+      }
+    });
+  </script>
+</body>
+</html>
