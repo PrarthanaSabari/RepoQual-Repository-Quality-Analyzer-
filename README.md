@@ -1,6 +1,6 @@
 # RepoQual-Repository-Quality-Analyzer
 
-A Flask-based web application that analyzes a public GitHub repository and checks whether it is **research-software-ready**.
+A Flask-based web application that analyzes public GitHub repositories and evaluates their research software readiness.
 
 The tool lets a user paste a GitHub repository URL into a webpage, then evaluates the repository using a weighted scoring system and generates:
 - A score out of 100
@@ -8,6 +8,10 @@ The tool lets a user paste a GitHub repository URL into a webpage, then evaluate
 - A prioritized fix checklist
 - A downloadable JSON report
 - A downloadable HTML report
+
+## Version
+
+v1.0
 
 ## Features
 
@@ -46,12 +50,27 @@ The project uses a weighted score out of 100.
 ## Project Structure
 
 ```text
+
 repo-ready-webapp/
 │
 ├── app.py
+├── requirements.txt
+├── README.md
+├── LICENSE
+├── pytest.ini
+├── CITATION.cff
+│
+├── tests/
+│   └── test_app.py
+│
+├── templates/
+│   └── index.html
+│
 ├── output/
-└── templates/
-    └── index.html
+│
+└── .github/
+    └── workflows/
+        └── test.yml
 ```
 
 ## Prerequisites
@@ -74,7 +93,7 @@ cd your-repo-name
 2. Install dependencies:
 
 ```bash
-pip install flask requests
+pip install -r requirements.txt
 ```
 
 ## How to Run
@@ -115,6 +134,15 @@ The application generates:
 - A prioritized fix checklist
 - Downloadable report files saved in the `output/` folder
 
+## Running Tests
+
+Run the test suite using:
+
+```bash
+pytest
+```
+
+
 ## Current Limitation
 
 In the current version, the app detects likely test files and infers a test command, but it does not fully clone and execute repository tests in an isolated environment. This version is mainly intended as an MVP for repository quality assessment through GitHub metadata and file inspection.
@@ -132,9 +160,8 @@ Possible extensions include:
 
 ## License
 
-This project currently does not include a license by default.  
-You should add an appropriate open-source license such as MIT if you plan to publish it publicly.
+This project is licensed under the MIT License.
 
 ## Author
 
-Developed as an academic/project submission for automated assessment of research software readiness.
+Developed by Prarthana S, Janani P, and Keerthana R as part of an academic project on automated assessment of research software readiness.
